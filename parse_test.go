@@ -11,6 +11,9 @@ type strtest struct {
 	out string
 }
 
+/*
+Tests the "str" function.
+*/
 func TestStr(t *testing.T) {
 	strs := []strtest{
 		strtest{"3:str", "str"},
