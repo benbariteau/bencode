@@ -3,7 +3,7 @@ package bencode
 import (
 	"errors"
 	"fmt"
-	"github.com/firba1/downpour/bencode/bare"
+	"github.com/firba1/bencode/bare"
 	"io"
 	"reflect"
 	"strconv"
