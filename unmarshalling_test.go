@@ -6,6 +6,24 @@ import (
 	"testing"
 )
 
+type valueTestcase struct {
+	in  string
+	out interface{}
+}
+
+func TestConsumeValue(t *testing.T) {
+	tests := []valueTestcase{
+		valueTestcase{"i2e", 2},
+		valueTestcase{"1:a", "a"},
+	}
+	for _, test := range tests {
+		out := consumeValue(bytes.NewBuffer([]byte(test.in)))
+		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
+			t.Error("Expecting", test.out, "got", i)
+		}
+	}
+}
+
 type intTestcase struct {
 	in  string
 	out int

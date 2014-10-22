@@ -30,10 +30,10 @@ func consumeValue(buffer *bytes.Buffer) reflect.Value {
 		return consumeInt(buffer)
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return consumeString(buffer)
-	case 'd':
-		//TODO dict
 	case 'l':
 		//TODO list
+	case 'd':
+		//TODO dict
 	default:
 		panic("Invalid thing")
 	}
