@@ -29,7 +29,7 @@ func consumeValue(buffer *bytes.Buffer) reflect.Value {
 	case 'i':
 		return consumeInt(buffer)
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		//TODO string
+		return consumeString(buffer)
 	case 'd':
 		//TODO dict
 	case 'l':
@@ -63,4 +63,25 @@ func consumeInt(buffer *bytes.Buffer) reflect.Value {
 		panic("Unable to convert number:" + err.Error())
 	}
 	return reflect.ValueOf(value)
+}
+
+func consumeString(buffer *bytes.Buffer) reflect.Value {
+	lengthString, err := buffer.ReadString(':')
+	if err != nil {
+		panic("Unable to read string length: " + err.Error())
+	}
+
+	//remove trailing ':'
+	lengthString = lengthString[:len(lengthString)-1]
+
+	length, err := strconv.Atoi(lengthString)
+	if err != nil {
+		panic("Unable to convert number:" + err.Error())
+	}
+
+	bytes := buffer.Next(length)
+	if len(bytes) < length {
+		panic(fmt.Sprint("Expecting string of length", length, "got", len(bytes)))
+	}
+	return reflect.ValueOf(string(bytes))
 }
