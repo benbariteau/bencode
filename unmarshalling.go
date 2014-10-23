@@ -27,9 +27,8 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	switch char {
 	case 'i':
 		consumeInt(variable, buffer)
-		return
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		//return consumeString(buffer)
+		consumeString(variable, buffer)
 	case 'l':
 		//return consumeList(buffer)
 	case 'd':
@@ -64,8 +63,7 @@ func consumeInt(variable reflect.Value, buffer *bytes.Buffer) {
 	variable.SetInt(int64(value))
 }
 
-/*
-func consumeString(buffer *bytes.Buffer) reflect.Value {
+func consumeString(variable reflect.Value, buffer *bytes.Buffer) {
 	lengthString, err := buffer.ReadString(':')
 	if err != nil {
 		panic("Unable to read string length: " + err.Error())
@@ -83,9 +81,10 @@ func consumeString(buffer *bytes.Buffer) reflect.Value {
 	if len(bytes) < length {
 		panic(fmt.Sprint("Expecting string of length", length, "got", len(bytes)))
 	}
-	return reflect.ValueOf(string(bytes))
+	variable.SetString(string(bytes))
 }
 
+/*
 func consumeList(buffer *bytes.Buffer) reflect.Value {
 	char, err := buffer.ReadByte()
 	if err != nil {
