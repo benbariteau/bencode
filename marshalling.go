@@ -14,16 +14,19 @@ func Marshal(v interface{}) []byte {
 func convertValue(value reflect.Value) []byte {
 	switch value.Type().Kind() {
 	case reflect.Int:
-		return []byte("i" + strconv.Itoa(value.Interface().(int)) + "e")
+		return convertInt(value.Interface().(int))
 	case reflect.String:
-		stringValue := value.Interface().(string)
-		return convertString(stringValue)
+		return convertString(value.Interface().(string))
 	case reflect.Slice:
 		return convertSlice(value)
 	case reflect.Struct:
 		return convertDict(value)
 	}
 	return []byte{}
+}
+
+func convertInt(i int) []byte {
+	return []byte("i" + strconv.Itoa(i) + "e")
 }
 
 func convertString(s string) []byte {
