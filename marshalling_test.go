@@ -29,6 +29,7 @@ func TestConvertSlice(t *testing.T) {
 	tests := []mtestcase{
 		mtestcase{[]int{2, 42, 666}, "li2ei42ei666ee"},
 		mtestcase{[]string{"fart", "butt"}, "l4:fart4:butte"},
+		mtestcase{[][]int{[]int{2}, []int{42}}, "lli2eeli42eee"},
 	}
 	for _, test := range tests {
 		out := string(convertSlice(reflect.ValueOf(test.in)))
@@ -41,6 +42,7 @@ func TestConvertSlice(t *testing.T) {
 func TestConvertDict(t *testing.T) {
 	tests := []mtestcase{
 		mtestcase{struct{ A string }{A: "butt"}, "d1:A4:butte"},
+		mtestcase{struct{ A []int }{A: []int{42, 666}}, "d1:Ali42ei666eee"},
 	}
 	for _, test := range tests {
 		out := string(convertDict(reflect.ValueOf(test.in)))
