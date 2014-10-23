@@ -98,7 +98,7 @@ func consumeList(buffer *bytes.Buffer) reflect.Value {
 
 	//assumes list is homogenous
 	firstValue := consumeValue(buffer)
-	slice := reflect.Zero(reflect.SliceOf(typeOfKind(firstValue.Kind())))
+	slice := reflect.Zero(reflect.SliceOf(firstValue.Type()))
 	slice = reflect.Append(slice, firstValue)
 
 	for {
@@ -120,15 +120,4 @@ func consumeList(buffer *bytes.Buffer) reflect.Value {
 		slice = reflect.Append(slice, value)
 	}
 	return slice
-}
-
-func typeOfKind(kind reflect.Kind) reflect.Type {
-	switch kind {
-	case reflect.Int:
-		return reflect.TypeOf(0)
-	case reflect.String:
-		return reflect.TypeOf("")
-	default:
-		return reflect.TypeOf(nil)
-	}
 }
