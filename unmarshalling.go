@@ -10,11 +10,10 @@ import (
 func Unmarshal(data []byte, v interface{}) {
 	container := reflect.ValueOf(v)
 	buffer := bytes.NewBuffer(data)
-	value := consumeValue(buffer)
-	container.Set(value)
+	consumeValue(container.Elem(), buffer)
 }
 
-func consumeValue(buffer *bytes.Buffer) reflect.Value {
+func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		//TODO replace with error type
@@ -27,20 +26,20 @@ func consumeValue(buffer *bytes.Buffer) reflect.Value {
 
 	switch char {
 	case 'i':
-		return consumeInt(buffer)
+		consumeInt(variable, buffer)
+		return
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		return consumeString(buffer)
+		//return consumeString(buffer)
 	case 'l':
-		return consumeList(buffer)
+		//return consumeList(buffer)
 	case 'd':
 		//TODO dict
 	default:
 		panic("Invalid thing")
 	}
-	return reflect.ValueOf(nil)
 }
 
-func consumeInt(buffer *bytes.Buffer) reflect.Value {
+func consumeInt(variable reflect.Value, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -62,9 +61,10 @@ func consumeInt(buffer *bytes.Buffer) reflect.Value {
 	if err != nil {
 		panic("Unable to convert number:" + err.Error())
 	}
-	return reflect.ValueOf(value)
+	variable.SetInt(int64(value))
 }
 
+/*
 func consumeString(buffer *bytes.Buffer) reflect.Value {
 	lengthString, err := buffer.ReadString(':')
 	if err != nil {
@@ -155,3 +155,4 @@ func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
 	}
 	return dictStruct
 }
+*/
