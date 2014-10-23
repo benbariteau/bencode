@@ -21,6 +21,7 @@ func convertValue(value reflect.Value) []byte {
 	case reflect.Slice:
 		return convertSlice(value)
 	case reflect.Struct:
+		return convertDict(value)
 	}
 	return []byte{}
 }
