@@ -63,13 +63,16 @@ func TestConsumeString(t *testing.T) {
 }
 
 func TestConsumeList(t *testing.T) {
+	type onefield struct {
+		A string
+	}
 	tests := []testcase{
 		testcase{"li2ei42ei666ee", []int{2, 42, 666}},
 		testcase{"l1:a1:b1:ce", []string{"a", "b", "c"}},
 		testcase{"lli2eeli42eee", [][]int{[]int{2}, []int{42}}},
-		testcase{"ld1:A4:butted1:A4:fartee", []struct{ A string }{
-			struct{ A string }{"butt"},
-			struct{ A string }{"fart"},
+		testcase{"ld1:A4:butted1:A4:fartee", []onefield{
+			onefield{"butt"},
+			onefield{"fart"},
 		}},
 	}
 
@@ -83,11 +86,20 @@ func TestConsumeList(t *testing.T) {
 }
 
 func TestConsumeDict(t *testing.T) {
+	type twofield struct {
+		A int
+		B string
+	}
+	type liststruct struct {
+		A []int
+	}
 	tests := []testcase{
-		testcase{"d1:Ai42e1:B3:xyze", struct {
-			A int
-			B string
-		}{A: 42, B: "xyz"}},
+		testcase{"d1:Ai42e1:B3:xyze", twofield{
+			A: 42, B: "xyz",
+		}},
+		testcase{"d1:Ali2ei42ei666eee", liststruct{
+			A: []int{2, 42, 666},
+		}},
 	}
 
 	for _, test := range tests {
