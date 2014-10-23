@@ -37,3 +37,15 @@ func TestConvertSlice(t *testing.T) {
 		}
 	}
 }
+
+func TestConvertDict(t *testing.T) {
+	tests := []mtestcase{
+		mtestcase{struct{ A string }{A: "butt"}, "d1:A4:butte"},
+	}
+	for _, test := range tests {
+		out := string(convertDict(reflect.ValueOf(test.in)))
+		if out != test.out {
+			t.Error("Expecting", test.out, "got", out)
+		}
+	}
+}
