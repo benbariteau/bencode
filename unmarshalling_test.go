@@ -93,12 +93,23 @@ func TestConsumeDict(t *testing.T) {
 	type liststruct struct {
 		A []int
 	}
+	type onefield struct {
+		B string
+	}
+	type structstruct struct {
+		A onefield
+	}
 	tests := []testcase{
 		testcase{"d1:Ai42e1:B3:xyze", twofield{
 			A: 42, B: "xyz",
 		}},
 		testcase{"d1:Ali2ei42ei666eee", liststruct{
 			A: []int{2, 42, 666},
+		}},
+		testcase{"d1:Ad1:B3:xyzee", structstruct{
+			A: onefield{
+				B: "xyz",
+			},
 		}},
 	}
 
