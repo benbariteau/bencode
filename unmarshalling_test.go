@@ -67,6 +67,10 @@ func TestConsumeList(t *testing.T) {
 		testcase{"li2ei42ei666ee", []int{2, 42, 666}},
 		testcase{"l1:a1:b1:ce", []string{"a", "b", "c"}},
 		testcase{"lli2eeli42eee", [][]int{[]int{2}, []int{42}}},
+		testcase{"ld1:A4:butted1:A4:fartee", []struct{ A string }{
+			struct{ A string }{"butt"},
+			struct{ A string }{"fart"},
+		}},
 	}
 
 	for _, test := range tests {
