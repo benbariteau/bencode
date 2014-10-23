@@ -31,7 +31,7 @@ func consumeValue(buffer *bytes.Buffer) reflect.Value {
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		return consumeString(buffer)
 	case 'l':
-		//TODO list
+		return consumeList(buffer)
 	case 'd':
 		//TODO dict
 	default:
@@ -84,4 +84,51 @@ func consumeString(buffer *bytes.Buffer) reflect.Value {
 		panic(fmt.Sprint("Expecting string of length", length, "got", len(bytes)))
 	}
 	return reflect.ValueOf(string(bytes))
+}
+
+func consumeList(buffer *bytes.Buffer) reflect.Value {
+	char, err := buffer.ReadByte()
+	if err != nil {
+		panic("Unable to read next byte:" + err.Error())
+	}
+
+	if char != 'l' {
+		panic(fmt.Sprintf("Expecting 'l', found '%v'", char))
+	}
+
+	//assumes list is homogenous
+	firstValue := consumeValue(buffer)
+	slice := reflect.Zero(reflect.SliceOf(typeOfKind(firstValue.Kind())))
+	slice = reflect.Append(slice, firstValue)
+
+	for {
+		char, err := buffer.ReadByte()
+		if err != nil {
+			panic("Unable to read next byte:" + err.Error())
+		}
+
+		if char == 'e' {
+			break
+		}
+
+		err = buffer.UnreadByte()
+		if err != nil {
+			panic("Unable to read next byte:" + err.Error())
+		}
+
+		value := consumeValue(buffer)
+		slice = reflect.Append(slice, value)
+	}
+	return slice
+}
+
+func typeOfKind(kind reflect.Kind) reflect.Type {
+	switch kind {
+	case reflect.Int:
+		return reflect.TypeOf(0)
+	case reflect.String:
+		return reflect.TypeOf("")
+	default:
+		return reflect.TypeOf(nil)
+	}
 }
