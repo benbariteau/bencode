@@ -30,7 +30,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		consumeString(variable, buffer)
 	case 'l':
-		//return consumeList(buffer)
+		consumeList(variable, buffer)
 	case 'd':
 		//TODO dict
 	default:
@@ -84,8 +84,7 @@ func consumeString(variable reflect.Value, buffer *bytes.Buffer) {
 	variable.SetString(string(bytes))
 }
 
-/*
-func consumeList(buffer *bytes.Buffer) reflect.Value {
+func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -95,11 +94,7 @@ func consumeList(buffer *bytes.Buffer) reflect.Value {
 		panic(fmt.Sprintf("Expecting 'l', found '%v'", char))
 	}
 
-	//assumes list is homogenous
-	firstValue := consumeValue(buffer)
-	slice := reflect.Zero(reflect.SliceOf(firstValue.Type()))
-	slice = reflect.Append(slice, firstValue)
-
+	slice := variable
 	for {
 		char, err := buffer.ReadByte()
 		if err != nil {
@@ -115,12 +110,14 @@ func consumeList(buffer *bytes.Buffer) reflect.Value {
 			panic("Unable to read next byte:" + err.Error())
 		}
 
-		value := consumeValue(buffer)
+		value := reflect.New(variable.Type().Elem()).Elem()
+		consumeValue(value, buffer)
 		slice = reflect.Append(slice, value)
 	}
-	return slice
+	variable.Set(slice)
 }
 
+/*
 func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
 	char, err := buffer.ReadByte()
 	if err != nil {
