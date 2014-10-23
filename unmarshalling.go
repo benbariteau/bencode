@@ -34,7 +34,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case 'd':
 		consumeDict(variable, buffer)
 	default:
-		panic("Invalid thing")
+		panic(fmt.Sprintf("Expecting 'i', 'l', 'd', or a digit (0-9), found, '%v'", char))
 	}
 }
 
