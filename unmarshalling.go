@@ -121,3 +121,37 @@ func consumeList(buffer *bytes.Buffer) reflect.Value {
 	}
 	return slice
 }
+
+func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
+	char, err := buffer.ReadByte()
+	if err != nil {
+		panic("Unable to read next byte:" + err.Error())
+	}
+
+	if char != 'd' {
+		panic(fmt.Sprintf("Expecting 'd', found '%v'", char))
+	}
+
+	dictStruct := reflect.New(structType).Elem()
+	for {
+		char, err := buffer.ReadByte()
+		if err != nil {
+			panic("Unable to read next byte:" + err.Error())
+		}
+
+		if char == 'e' {
+			break
+		}
+
+		err = buffer.UnreadByte()
+		if err != nil {
+			panic("Unable to read next byte:" + err.Error())
+		}
+
+		key := consumeString(buffer)
+		field := dictStruct.FieldByName(key.Interface().(string))
+		value := consumeValue(buffer)
+		field.Set(value)
+	}
+	return dictStruct
+}

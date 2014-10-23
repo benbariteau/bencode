@@ -82,3 +82,29 @@ func TestConsumeList(t *testing.T) {
 		}
 	}
 }
+
+type dictTestcase struct {
+	in  string
+	out interface{}
+}
+
+type testStruct struct {
+	a int
+	b string
+}
+
+func TestConsumeDict(t *testing.T) {
+	tests := []dictTestcase{
+		dictTestcase{"d1:Ai42e1:B3:xyze", struct {
+			A int
+			B string
+		}{A: 42, B: "xyz"}},
+	}
+
+	for _, test := range tests {
+		out := consumeDict(bytes.NewBuffer([]byte(test.in)), reflect.TypeOf(test.out))
+		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
+			t.Error("Expecting", test.out, "got", i)
+		}
+	}
+}
