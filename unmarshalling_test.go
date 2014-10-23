@@ -16,6 +16,10 @@ func TestConsumeValue(t *testing.T) {
 		testcase{"i2e", 2},
 		testcase{"1:a", "a"},
 		testcase{"li2ei42ei666ee", []int{2, 42, 666}},
+		testcase{"d1:Ai42e1:B3:xyze", struct {
+			A int
+			B string
+		}{A: 42, B: "xyz"}},
 	}
 	for _, test := range tests {
 		out := reflect.New(reflect.TypeOf(test.out)).Elem()
@@ -74,7 +78,6 @@ func TestConsumeList(t *testing.T) {
 	}
 }
 
-/*
 func TestConsumeDict(t *testing.T) {
 	tests := []testcase{
 		testcase{"d1:Ai42e1:B3:xyze", struct {
@@ -84,10 +87,10 @@ func TestConsumeDict(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		out := consumeDict(bytes.NewBuffer([]byte(test.in)), reflect.TypeOf(test.out))
+		out := reflect.New(reflect.TypeOf(test.out)).Elem()
+		consumeDict(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
 		}
 	}
 }
-*/

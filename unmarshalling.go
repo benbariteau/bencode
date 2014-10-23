@@ -32,7 +32,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case 'l':
 		consumeList(variable, buffer)
 	case 'd':
-		//TODO dict
+		consumeDict(variable, buffer)
 	default:
 		panic("Invalid thing")
 	}
@@ -117,8 +117,7 @@ func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
 	variable.Set(slice)
 }
 
-/*
-func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
+func consumeDict(variable reflect.Value, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -128,7 +127,6 @@ func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
 		panic(fmt.Sprintf("Expecting 'd', found '%v'", char))
 	}
 
-	dictStruct := reflect.New(structType).Elem()
 	for {
 		char, err := buffer.ReadByte()
 		if err != nil {
@@ -144,11 +142,9 @@ func consumeDict(buffer *bytes.Buffer, structType reflect.Type) reflect.Value {
 			panic("Unable to read next byte:" + err.Error())
 		}
 
-		key := consumeString(buffer)
-		field := dictStruct.FieldByName(key.Interface().(string))
-		value := consumeValue(buffer)
-		field.Set(value)
+		key := reflect.New(reflect.TypeOf("")).Elem()
+		consumeString(key, buffer)
+		field := variable.FieldByName(key.Interface().(string))
+		consumeValue(field, buffer)
 	}
-	return dictStruct
 }
-*/
