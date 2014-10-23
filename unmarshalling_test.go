@@ -66,7 +66,7 @@ func TestConsumeList(t *testing.T) {
 	tests := []testcase{
 		testcase{"li2ei42ei666ee", []int{2, 42, 666}},
 		testcase{"l1:a1:b1:ce", []string{"a", "b", "c"}},
-		//testcase{"lli2eeli42eee", [][]int{[]int{2}, []int{42}}},
+		testcase{"lli2eeli42eee", [][]int{[]int{2}, []int{42}}},
 	}
 
 	for _, test := range tests {
