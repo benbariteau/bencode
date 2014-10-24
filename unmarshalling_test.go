@@ -46,7 +46,7 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
-func TestConsumeString(t *testing.T) {
+func TestParseString(t *testing.T) {
 	tests := []testcase{
 		testcase{"1:s", "s"},
 		testcase{"4:butt", "butt"},
@@ -55,7 +55,7 @@ func TestConsumeString(t *testing.T) {
 	for _, test := range tests {
 		var o string
 		out := reflect.ValueOf(&o).Elem()
-		consumeString(out, bytes.NewBuffer([]byte(test.in)))
+		parseString(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
 		}

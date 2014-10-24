@@ -28,7 +28,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case 'i':
 		parseInt(variable, buffer)
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		consumeString(variable, buffer)
+		parseString(variable, buffer)
 	case 'l':
 		consumeList(variable, buffer)
 	case 'd':
@@ -67,7 +67,11 @@ func consumeInt(buffer *bytes.Buffer) int {
 	return value
 }
 
-func consumeString(variable reflect.Value, buffer *bytes.Buffer) {
+func parseString(variable reflect.Value, buffer *bytes.Buffer) {
+	variable.SetString(consumeString(buffer))
+}
+
+func consumeString(buffer *bytes.Buffer) string {
 	lengthString, err := buffer.ReadString(':')
 	if err != nil {
 		panic("Unable to read string length: " + err.Error())
@@ -85,7 +89,7 @@ func consumeString(variable reflect.Value, buffer *bytes.Buffer) {
 	if len(bytes) < length {
 		panic(fmt.Sprint("Expecting string of length", length, "got", len(bytes)))
 	}
-	variable.SetString(string(bytes))
+	return string(bytes)
 }
 
 func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
@@ -147,7 +151,7 @@ func consumeDict(variable reflect.Value, buffer *bytes.Buffer) {
 		}
 
 		key := reflect.New(reflect.TypeOf("")).Elem()
-		consumeString(key, buffer)
+		parseString(key, buffer)
 		field := variable.FieldByName(key.Interface().(string))
 		consumeValue(field, buffer)
 	}
