@@ -30,7 +30,7 @@ func TestConsumeValue(t *testing.T) {
 	}
 }
 
-func TestConsumeInt(t *testing.T) {
+func TestParseInt(t *testing.T) {
 	tests := []testcase{
 		testcase{"i2e", 2},
 		testcase{"i42e", 42},
@@ -39,7 +39,7 @@ func TestConsumeInt(t *testing.T) {
 	for _, test := range tests {
 		var o int
 		out := reflect.ValueOf(&o).Elem()
-		consumeInt(out, bytes.NewBuffer([]byte(test.in)))
+		parseInt(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
 		}

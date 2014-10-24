@@ -26,7 +26,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 
 	switch char {
 	case 'i':
-		consumeInt(variable, buffer)
+		parseInt(variable, buffer)
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		consumeString(variable, buffer)
 	case 'l':
@@ -38,7 +38,11 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	}
 }
 
-func consumeInt(variable reflect.Value, buffer *bytes.Buffer) {
+func parseInt(variable reflect.Value, buffer *bytes.Buffer) {
+	variable.SetInt(int64(consumeInt(buffer)))
+}
+
+func consumeInt(buffer *bytes.Buffer) int {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -60,7 +64,7 @@ func consumeInt(variable reflect.Value, buffer *bytes.Buffer) {
 	if err != nil {
 		panic("Unable to convert number:" + err.Error())
 	}
-	variable.SetInt(int64(value))
+	return value
 }
 
 func consumeString(variable reflect.Value, buffer *bytes.Buffer) {
