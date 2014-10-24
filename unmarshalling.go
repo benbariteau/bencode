@@ -30,7 +30,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		parseString(variable, buffer)
 	case 'l':
-		consumeList(variable, buffer)
+		parseList(variable, buffer)
 	case 'd':
 		consumeDict(variable, buffer)
 	default:
@@ -92,7 +92,17 @@ func consumeString(buffer *bytes.Buffer) string {
 	return string(bytes)
 }
 
-func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
+func parseList(variable reflect.Value, buffer *bytes.Buffer) {
+	listBuffer := realBuffer{&variable}
+	parseListHelper(listBuffer, variable, buffer)
+}
+
+func parseListHelper(listBuffer sliceBuffer, variable reflect.Value, buffer *bytes.Buffer) {
+	consumeList(listBuffer, buffer)
+	variable.Set(listBuffer.value())
+}
+
+func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -102,7 +112,6 @@ func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
 		panic(fmt.Sprintf("Expecting 'l', found '%v'", char))
 	}
 
-	slice := variable
 	for {
 		char, err := buffer.ReadByte()
 		if err != nil {
@@ -118,11 +127,10 @@ func consumeList(variable reflect.Value, buffer *bytes.Buffer) {
 			panic("Unable to read next byte:" + err.Error())
 		}
 
-		value := reflect.New(variable.Type().Elem()).Elem()
+		value := listBuffer.newValue()
 		consumeValue(value, buffer)
-		slice = reflect.Append(slice, value)
+		listBuffer.push(value)
 	}
-	variable.Set(slice)
 }
 
 func consumeDict(variable reflect.Value, buffer *bytes.Buffer) {

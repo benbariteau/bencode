@@ -62,7 +62,7 @@ func TestParseString(t *testing.T) {
 	}
 }
 
-func TestConsumeList(t *testing.T) {
+func TestParseList(t *testing.T) {
 	type onefield struct {
 		A string
 	}
@@ -78,7 +78,7 @@ func TestConsumeList(t *testing.T) {
 
 	for _, test := range tests {
 		out := reflect.New(reflect.TypeOf(test.out)).Elem()
-		consumeList(out, bytes.NewBuffer([]byte(test.in)))
+		parseList(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
 		}
