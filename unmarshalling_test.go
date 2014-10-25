@@ -99,6 +99,9 @@ func TestParseDict(t *testing.T) {
 	type structstruct struct {
 		A onefield
 	}
+	type tagged struct {
+		A string `bencode:"tag"`
+	}
 	tests := []testcase{
 		testcase{"d1:Ai42e1:B3:xyze", twofield{
 			A: 42, B: "xyz",
@@ -111,6 +114,7 @@ func TestParseDict(t *testing.T) {
 				B: "xyz",
 			},
 		}},
+		testcase{"d3:tag3:xyze", tagged{A: "xyz"}},
 	}
 
 	for _, test := range tests {
