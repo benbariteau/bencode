@@ -85,7 +85,7 @@ func TestParseList(t *testing.T) {
 	}
 }
 
-func TestConsumeDict(t *testing.T) {
+func TestParseDict(t *testing.T) {
 	type twofield struct {
 		A int
 		B string
@@ -115,7 +115,7 @@ func TestConsumeDict(t *testing.T) {
 
 	for _, test := range tests {
 		out := reflect.New(reflect.TypeOf(test.out)).Elem()
-		consumeDict(out, bytes.NewBuffer([]byte(test.in)))
+		parseDict(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
 		}

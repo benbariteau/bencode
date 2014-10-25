@@ -5,30 +5,29 @@ import (
 	"reflect"
 )
 
-func getStructField(name string, variable reflect.Value) (reflect.Value, error) {
-	structType := variable.Type()
-	for i := 0; i < variable.NumField(); i++ {
+type structHolder interface {
+	getField(name string) reflect.Value
+}
+
+type realStructHolder struct {
+	struc *reflect.Value
+}
+
+func (h realStructHolder) getField(name string) reflect.Value {
+	structType := h.struc.Type()
+	for i := 0; i < h.struc.NumField(); i++ {
 		field := structType.Field(i)
 		if field.PkgPath != "" { // if field not exported, it can't be set
 			continue
 		}
 		tagName := field.Tag.Get("bencode")
 		if tagName != "" && name == tagName {
-			return variable.Field(i), nil
+			return h.struc.Field(i)
 		} else if name == field.Name {
-			return variable.Field(i), nil
+			return h.struc.Field(i)
 		}
 	}
-	return reflect.Value{}, noFieldError{name, structType}
-}
-
-type noFieldError struct {
-	fieldName  string
-	structType reflect.Type
-}
-
-func (e noFieldError) Error() string {
-	return fmt.Sprintf("Field '%v' no in struct type '%T'", e.fieldName, e.structType)
+	return reflect.Value{}
 }
 
 type sliceBuffer interface {

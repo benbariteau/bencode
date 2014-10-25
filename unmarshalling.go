@@ -32,7 +32,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 	case 'l':
 		parseList(variable, buffer)
 	case 'd':
-		consumeDict(variable, buffer)
+		parseDict(variable, buffer)
 	default:
 		panic(fmt.Sprintf("Expecting 'i', 'l', 'd', or a digit (0-9), found, '%v'", char))
 	}
@@ -133,7 +133,12 @@ func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
 	}
 }
 
-func consumeDict(variable reflect.Value, buffer *bytes.Buffer) {
+func parseDict(variable reflect.Value, buffer *bytes.Buffer) {
+	thing := realStructHolder{&variable}
+	consumeDict(thing, buffer)
+}
+
+func consumeDict(thing structHolder, buffer *bytes.Buffer) {
 	char, err := buffer.ReadByte()
 	if err != nil {
 		panic("Unable to read next byte:" + err.Error())
@@ -160,7 +165,7 @@ func consumeDict(variable reflect.Value, buffer *bytes.Buffer) {
 
 		key := reflect.New(reflect.TypeOf("")).Elem()
 		parseString(key, buffer)
-		field := variable.FieldByName(key.Interface().(string))
+		field := thing.getField(key.Interface().(string))
 		consumeValue(field, buffer)
 	}
 }
