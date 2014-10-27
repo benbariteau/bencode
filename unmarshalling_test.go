@@ -115,6 +115,7 @@ func TestParseDict(t *testing.T) {
 			},
 		}},
 		testcase{"d3:tag3:xyze", tagged{A: "xyz"}},
+		testcase{"d3:tag3:xyz1:a1:be", tagged{A: "xyz"}},
 	}
 
 	for _, test := range tests {

@@ -30,6 +30,12 @@ func (h realStructHolder) getField(name string) reflect.Value {
 	return reflect.Value{}
 }
 
+type fakeStructHolder bool
+
+func (h fakeStructHolder) getField(name string) reflect.Value {
+	return reflect.Value{}
+}
+
 type sliceBuffer interface {
 	newValue() reflect.Value
 	push(value reflect.Value)
@@ -54,4 +60,16 @@ func (s realBuffer) String() string {
 
 func (s realBuffer) value() reflect.Value {
 	return *s.slice
+}
+
+type fakeBuffer bool
+
+func (b fakeBuffer) newValue() reflect.Value {
+	return reflect.Value{}
+}
+
+func (b fakeBuffer) push(value reflect.Value) {}
+
+func (b fakeBuffer) value() reflect.Value {
+	return reflect.Value{}
 }

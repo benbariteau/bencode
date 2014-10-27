@@ -13,7 +13,37 @@ func Unmarshal(data []byte, v interface{}) {
 	consumeValue(container.Elem(), buffer)
 }
 
+var parseMapInitialized bool = false
+var regularParseMap map[byte]parserFunc
+var ignoreParseMap map[byte]parserFunc
+
+type parserFunc func(reflect.Value, *bytes.Buffer)
+
+func generateParserMap(intParser, stringParser, listParser, dictParser parserFunc) map[byte]parserFunc {
+	parserMap := make(map[byte]parserFunc)
+	parserMap['i'] = intParser
+	parserMap['l'] = listParser
+	parserMap['d'] = dictParser
+	for i := 0; i <= 9; i++ {
+		key := strconv.Itoa(i)[0]
+		parserMap[key] = stringParser
+	}
+	return parserMap
+}
+
 func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
+
+	if !parseMapInitialized {
+		parseMapInitialized = true
+		regularParseMap = generateParserMap(parseInt, parseString, parseList, parseDict)
+		ignoreParseMap = generateParserMap(ignoreInt, ignoreString, ignoreList, ignoreDict)
+	}
+
+	parseMap := regularParseMap
+	if !variable.IsValid() {
+		parseMap = ignoreParseMap
+	}
+
 	char, err := buffer.ReadByte()
 	if err != nil {
 		//TODO replace with error type
@@ -24,22 +54,19 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 		panic("Unable to read next byte:" + err.Error())
 	}
 
-	switch char {
-	case 'i':
-		parseInt(variable, buffer)
-	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		parseString(variable, buffer)
-	case 'l':
-		parseList(variable, buffer)
-	case 'd':
-		parseDict(variable, buffer)
-	default:
+	handler, ok := parseMap[char]
+	if !ok {
 		panic(fmt.Sprintf("Expecting 'i', 'l', 'd', or a digit (0-9), found, '%v'", char))
 	}
+	handler(variable, buffer)
 }
 
 func parseInt(variable reflect.Value, buffer *bytes.Buffer) {
 	variable.SetInt(int64(consumeInt(buffer)))
+}
+
+func ignoreInt(variable reflect.Value, buffer *bytes.Buffer) {
+	consumeInt(buffer)
 }
 
 func consumeInt(buffer *bytes.Buffer) int {
@@ -71,6 +98,10 @@ func parseString(variable reflect.Value, buffer *bytes.Buffer) {
 	variable.SetString(consumeString(buffer))
 }
 
+func ignoreString(variable reflect.Value, buffer *bytes.Buffer) {
+	consumeString(buffer)
+}
+
 func consumeString(buffer *bytes.Buffer) string {
 	lengthString, err := buffer.ReadString(':')
 	if err != nil {
@@ -100,6 +131,10 @@ func parseList(variable reflect.Value, buffer *bytes.Buffer) {
 func parseListHelper(listBuffer sliceBuffer, variable reflect.Value, buffer *bytes.Buffer) {
 	consumeList(listBuffer, buffer)
 	variable.Set(listBuffer.value())
+}
+
+func ignoreList(variable reflect.Value, buffer *bytes.Buffer) {
+	consumeList(fakeBuffer(false), buffer)
 }
 
 func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
@@ -136,6 +171,10 @@ func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
 func parseDict(variable reflect.Value, buffer *bytes.Buffer) {
 	thing := realStructHolder{&variable}
 	consumeDict(thing, buffer)
+}
+
+func ignoreDict(variable reflect.Value, buffer *bytes.Buffer) {
+	consumeDict(fakeStructHolder(false), buffer)
 }
 
 func consumeDict(thing structHolder, buffer *bytes.Buffer) {
