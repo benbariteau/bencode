@@ -11,6 +11,43 @@ type testcase struct {
 	out interface{}
 }
 
+func TestUnmarshal(t *testing.T) {
+	tests := []testcase{
+		testcase{"i2e", 2},
+		testcase{"1:a", "a"},
+		testcase{"li2ei42ei666ee", []int{2, 42, 666}},
+		testcase{"d1:Ai42e1:B3:xyze", struct {
+			A int
+			B string
+		}{A: 42, B: "xyz"}},
+	}
+
+	for _, test := range tests {
+		out := reflect.New(reflect.TypeOf(test.out))
+		err := Unmarshal([]byte(test.in), out.Interface())
+		if err != nil {
+			t.Error("Error while running test:", err)
+		} else if i := out.Elem().Interface(); !reflect.DeepEqual(i, test.out) {
+			t.Error("Expecting", test.out, "got", i)
+		}
+	}
+}
+
+func TestInvalidUnmarshal(t *testing.T) {
+	tests := []testcase{
+		testcase{"a", 0},
+		testcase{"", 0},
+	}
+
+	for _, test := range tests {
+		out := reflect.New(reflect.TypeOf(test.out))
+		err := Unmarshal([]byte(test.in), out.Interface())
+		if err == nil {
+			t.Errorf("Expecting error for input: \"%v\"", test.in)
+		}
+	}
+}
+
 func TestConsumeValue(t *testing.T) {
 	tests := []testcase{
 		testcase{"i2e", 2},
@@ -46,6 +83,26 @@ func TestParseInt(t *testing.T) {
 	}
 }
 
+func TestInvalidParseInt(t *testing.T) {
+	tests := []testcase{
+		testcase{"2e", 2},
+		testcase{"i42", 42},
+		testcase{"666", 666},
+		testcase{"i2/e", 2},
+		testcase{"", 0},
+	}
+	for _, test := range tests {
+		var o int
+		out := reflect.ValueOf(&o).Elem()
+		err := errorCatcher(func() {
+			parseInt(out, bytes.NewBuffer([]byte(test.in)))
+		})
+		if err == nil {
+			t.Errorf("Expecting error for input: \"%v\"", test.in)
+		}
+	}
+}
+
 func TestParseString(t *testing.T) {
 	tests := []testcase{
 		testcase{"1:s", "s"},
@@ -58,6 +115,23 @@ func TestParseString(t *testing.T) {
 		parseString(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
+		}
+	}
+}
+func TestInvalidParseString(t *testing.T) {
+	tests := []testcase{
+		testcase{"4", ""},
+		testcase{"4/:", ""},
+		testcase{"5:fart", "fart"},
+	}
+	for _, test := range tests {
+		var o int
+		out := reflect.ValueOf(&o).Elem()
+		err := errorCatcher(func() {
+			parseString(out, bytes.NewBuffer([]byte(test.in)))
+		})
+		if err == nil {
+			t.Errorf("Expecting error for input: \"%v\"", test.in)
 		}
 	}
 }
@@ -121,6 +195,8 @@ func TestParseDict(t *testing.T) {
 		testcase{"d3:tag3:xyze", tagged{A: "xyz"}},
 		testcase{"d3:tag3:xyz1:a1:be", tagged{A: "xyz"}},
 		testcase{"d1:Ai42e1:bi666ee", unexported{A: 42}},
+		testcase{"d1:B4:fart1:cd1:di666eee", onefield{"fart"}},
+		testcase{"d1:B4:fart1:cli1ei2ei3eee", onefield{"fart"}},
 	}
 
 	for _, test := range tests {

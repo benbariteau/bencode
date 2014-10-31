@@ -2,15 +2,29 @@ package bencode
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 )
 
-func Unmarshal(data []byte, v interface{}) {
+func Unmarshal(data []byte, v interface{}) (err error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			switch r := r.(type) {
+			case string:
+				err = errors.New(r)
+			case error:
+				err = r
+			}
+		}
+	}()
+
 	container := reflect.ValueOf(v)
 	buffer := bytes.NewBuffer(data)
 	consumeValue(container.Elem(), buffer)
+	return nil
 }
 
 var parseMapInitialized bool = false
