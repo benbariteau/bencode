@@ -29,7 +29,7 @@ func (h realStructHolder) getField(name string) reflect.Value {
 	return reflect.Value{}
 }
 
-type fakeStructHolder bool
+type fakeStructHolder struct{}
 
 func (h fakeStructHolder) getField(name string) reflect.Value {
 	return reflect.Value{}
@@ -57,7 +57,7 @@ func (s realBuffer) value() reflect.Value {
 	return *s.slice
 }
 
-type fakeBuffer bool
+type fakeBuffer struct{}
 
 func (b fakeBuffer) newValue() reflect.Value {
 	return reflect.Value{}

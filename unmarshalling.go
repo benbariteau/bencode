@@ -134,7 +134,7 @@ func parseListHelper(listBuffer sliceBuffer, variable reflect.Value, buffer *byt
 }
 
 func ignoreList(variable reflect.Value, buffer *bytes.Buffer) {
-	consumeList(fakeBuffer(false), buffer)
+	consumeList(fakeBuffer{}, buffer)
 }
 
 func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
@@ -174,7 +174,7 @@ func parseDict(variable reflect.Value, buffer *bytes.Buffer) {
 }
 
 func ignoreDict(variable reflect.Value, buffer *bytes.Buffer) {
-	consumeDict(fakeStructHolder(false), buffer)
+	consumeDict(fakeStructHolder{}, buffer)
 }
 
 func consumeDict(thing structHolder, buffer *bytes.Buffer) {
