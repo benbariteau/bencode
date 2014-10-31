@@ -1,7 +1,6 @@
 package bencode
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -52,10 +51,6 @@ func (s realBuffer) newValue() reflect.Value {
 
 func (s realBuffer) push(value reflect.Value) {
 	*s.slice = reflect.Append(*s.slice, value)
-}
-
-func (s realBuffer) String() string {
-	return fmt.Sprint(s.slice.Interface())
 }
 
 func (s realBuffer) value() reflect.Value {
