@@ -2,6 +2,7 @@ package bencode
 
 import (
 	"bytes"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -45,6 +46,13 @@ func TestInvalidUnmarshal(t *testing.T) {
 		if err == nil {
 			t.Errorf("Expecting error for input: \"%v\"", test.in)
 		}
+	}
+}
+
+func TestNonpointerUnmarshal(t *testing.T) {
+	err := Unmarshal([]byte{}, 1)
+	if err == nil {
+		t.Errorf("Expecting error on non-pointer input to Unmarshal")
 	}
 }
 
@@ -125,7 +133,7 @@ func TestInvalidParseString(t *testing.T) {
 		testcase{"5:fart", "fart"},
 	}
 	for _, test := range tests {
-		var o int
+		var o string
 		out := reflect.ValueOf(&o).Elem()
 		err := errorCatcher(func() {
 			parseString(out, bytes.NewBuffer([]byte(test.in)))
@@ -155,6 +163,23 @@ func TestParseList(t *testing.T) {
 		parseList(out, bytes.NewBuffer([]byte(test.in)))
 		if i := out.Interface(); !reflect.DeepEqual(i, test.out) {
 			t.Error("Expecting", test.out, "got", i)
+		}
+	}
+}
+
+func TestInvalidParseList(t *testing.T) {
+	tests := []testcase{
+		testcase{"", []int{}},
+		testcase{"f", []int{}},
+		testcase{"l", []int{}},
+	}
+	for _, test := range tests {
+		out := reflect.ValueOf(reflect.TypeOf(test.out)).Elem()
+		err := errorCatcher(func() {
+			parseList(out, bytes.NewBuffer([]byte(test.in)))
+		})
+		if err == nil {
+			t.Errorf("Expecting error for input: \"%v\"", test.in)
 		}
 	}
 }
@@ -206,4 +231,36 @@ func TestParseDict(t *testing.T) {
 			t.Error("Expecting", test.out, "got", i)
 		}
 	}
+}
+
+func TestInvalidParseDict(t *testing.T) {
+	tests := []testcase{
+		testcase{"", []int{}},
+		testcase{"f", []int{}},
+		testcase{"d", []int{}},
+	}
+	for _, test := range tests {
+		out := reflect.ValueOf(reflect.TypeOf(test.out)).Elem()
+		err := errorCatcher(func() {
+			parseDict(out, bytes.NewBuffer([]byte(test.in)))
+		})
+		if err == nil {
+			t.Errorf("Expecting error for input: \"%v\"", test.in)
+		}
+	}
+}
+
+func errorCatcher(f func()) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			switch r := r.(type) {
+			case string:
+				err = errors.New(r)
+			case error:
+				err = r
+			}
+		}
+	}()
+	f()
+	return nil
 }

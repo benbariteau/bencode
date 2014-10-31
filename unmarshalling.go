@@ -63,10 +63,7 @@ func consumeValue(variable reflect.Value, buffer *bytes.Buffer) {
 		//TODO replace with error type
 		panic("Unable to read next byte:" + err.Error())
 	}
-	err = buffer.UnreadByte()
-	if err != nil {
-		panic("Unable to read next byte:" + err.Error())
-	}
+	buffer.UnreadByte()
 
 	handler, ok := parseMap[char]
 	if !ok {
@@ -171,10 +168,7 @@ func consumeList(listBuffer sliceBuffer, buffer *bytes.Buffer) {
 			break
 		}
 
-		err = buffer.UnreadByte()
-		if err != nil {
-			panic("Unable to read next byte:" + err.Error())
-		}
+		buffer.UnreadByte()
 
 		value := listBuffer.newValue()
 		consumeValue(value, buffer)
@@ -211,10 +205,7 @@ func consumeDict(thing structHolder, buffer *bytes.Buffer) {
 			break
 		}
 
-		err = buffer.UnreadByte()
-		if err != nil {
-			panic("Unable to read next byte:" + err.Error())
-		}
+		buffer.UnreadByte()
 
 		key := reflect.New(reflect.TypeOf("")).Elem()
 		parseString(key, buffer)

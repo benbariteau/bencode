@@ -15,6 +15,7 @@ func TestMarshal(t *testing.T) {
 		mtestcase{2, "i2e"},
 		mtestcase{"fart", "4:fart"},
 		mtestcase{[]string{"fart", "butt"}, "l4:fart4:butte"},
+		mtestcase{struct{ A string }{A: "butt"}, "d1:A4:butte"},
 	}
 
 	for _, test := range tests {
@@ -52,6 +53,7 @@ func TestConvertDict(t *testing.T) {
 		mtestcase{struct{ A string }{A: "butt"}, "d1:A4:butte"},
 		mtestcase{struct{ A []int }{A: []int{42, 666}}, "d1:Ali42ei666eee"},
 		mtestcase{struct{ A struct{ A string } }{A: struct{ A string }{A: "butt"}}, "d1:Ad1:A4:buttee"},
+		mtestcase{struct{ a int }{1}, "de"},
 	}
 	for _, test := range tests {
 		out := string(convertDict(reflect.ValueOf(test.in)))

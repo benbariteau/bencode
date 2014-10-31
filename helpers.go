@@ -1,7 +1,6 @@
 package bencode
 
 import (
-	"errors"
 	"reflect"
 )
 
@@ -68,18 +67,4 @@ func (b fakeBuffer) push(value reflect.Value) {}
 
 func (b fakeBuffer) value() reflect.Value {
 	return reflect.Value{}
-}
-func errorCatcher(f func()) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			switch r := r.(type) {
-			case string:
-				err = errors.New(r)
-			case error:
-				err = r
-			}
-		}
-	}()
-	f()
-	return nil
 }
